@@ -4,6 +4,9 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean')
 const fileupload = require('express-fileupload');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
@@ -19,7 +22,7 @@ const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
 const auth = require('./routes/auth');
 const user = require('./routes/user');
-
+const reviews = require('./routes/reviews');
 const app = express();
 
 // Body parser
@@ -39,11 +42,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 // File uploading
 app.use(fileupload());
 
+// Sanitize data
+app.use(mongoSanitize());
+
+// set security headers
+app.use(helmet());
+
+// prevent cross site scripting attacks
+app.use(xss());
+
 // Mount routers
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/users', user)
+app.use('/api/v1/reviews', reviews);
 
 app.use(errorHandler);
 
